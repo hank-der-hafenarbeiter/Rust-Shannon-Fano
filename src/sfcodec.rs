@@ -1,5 +1,5 @@
 use sfsym;
-use sfvec;
+use src::sfvec;
 
 #[derive(Debug)]
 pub struct SFCodec {
