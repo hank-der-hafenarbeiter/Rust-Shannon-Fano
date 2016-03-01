@@ -3,18 +3,28 @@ use sfsym::SFSym;
 
 pub type SFVec = Vec<SFSym>;
 
-pub fn split(input_vec:SFVec) ->  usize {
-    let total_prob:f32 = input_vec.iter().fold(0.0,|sum:f32,x| sum+x.prob);
-    let mut prob_count:f32 = 0.0;
-    let mut result:usize = 0;
-    for (pos, ele) in input_vec.iter().enumerate(){
-        prob_count += ele.prob;
-        if prob_count > total_prob/2.0 {
-            result = pos;
-            break;
+pub fn split(input_vec:SFVec, begin:usize, end:usize) ->  Result<usize,String> {
+    if(begin < end && end < input_vec.len()) {
+        let mut total_prob:f32 = 0.0;
+        let mut prob_count:f32 = 0.0;
+        let mut result:usize = 0;
+
+        for i in begin..end {
+            total_prob += input_vec[i].prob;
         }
+
+        for (pos, ele) in input_vec.iter().enumerate(){
+            prob_count += ele.prob;
+            if prob_count > total_prob/2.0 {
+                result = pos;
+                break;
+            }
+        }
+        Ok(result-1)
     }
-    result
+    else {
+        Err("Invalid Parameters!".to_string())
+    }
 }
 
 
@@ -24,7 +34,8 @@ fn split_in_right_place() {
             SFSym{sym:'b', count:2, prob:3.0/10.0, coding:"1".to_string()},
             SFSym{sym:'c', count:1, prob:2.0/10.0, coding:"01".to_string()},
             SFSym{sym:'d', count:1, prob:2.0/10.0, coding:"10".to_string()},];
-    assert!(split(test_vec) == 1);
+    let length = test_vec.len();
+    assert!(split(test_vec, 0, length-1) == Ok(1));
 }
 
 #[test]
