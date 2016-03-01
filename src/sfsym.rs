@@ -15,6 +15,18 @@ impl cmp::Ord for SFSym {
 }
 
 impl cmp::PartialOrd for SFSym {
+
+    fn partial_cmp(&self, other:&Self) -> Option<cmp::Ordering> {
+        let cmp = self.count - other.count;
+        if cmp < 0 {
+            return Option(cmp::Ordering::Less)
+        }
+        if cmp == 0 {
+            return Option(cmp::Ordering::Equal)
+        }
+        Option(cmp::Ordering::Greater)
+    }
+
     fn lt(&self, other:&Self) -> bool {
         self.count < other.count
     }
@@ -41,6 +53,9 @@ impl cmp::PartialEq for SFSym {
         self.count != other.count
     }
 }
+
+impl cmp::Eq for SFSym {}
+
 impl Add for SFSym {
 
     type Output = f32;
