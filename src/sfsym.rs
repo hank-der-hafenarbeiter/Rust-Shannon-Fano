@@ -1,5 +1,6 @@
 use std::cmp;
 use std::ops::Add;
+use std::option::Option;
 
 pub struct SFSym {
     pub	sym:char,
@@ -10,7 +11,7 @@ pub struct SFSym {
 
 impl cmp::Ord for SFSym {
     fn cmp(&self, other:&Self) -> cmp::Ordering {
-        self.count.cmp(other.count);
+        self.count.cmp(&other.count)
     }
 }
 
@@ -19,12 +20,12 @@ impl cmp::PartialOrd for SFSym {
     fn partial_cmp(&self, other:&Self) -> Option<cmp::Ordering> {
         let cmp = self.count - other.count;
         if cmp < 0 {
-            return Option(cmp::Ordering::Less)
+            return Some(cmp::Ordering::Less)
         }
         if cmp == 0 {
-            return Option(cmp::Ordering::Equal)
+            return Some(cmp::Ordering::Equal)
         }
-        Option(cmp::Ordering::Greater)
+        Some(cmp::Ordering::Greater)
     }
 
     fn lt(&self, other:&Self) -> bool {
@@ -36,11 +37,11 @@ impl cmp::PartialOrd for SFSym {
     }
 
     fn gt(&self, other:&Self) -> bool {
-        self.count > other.count;
+        self.count > other.count
     }
 
     fn ge(&self, other:&Self) -> bool {
-        self.count >= other.count;
+        self.count >= other.count
     }
 }
 

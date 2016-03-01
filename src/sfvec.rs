@@ -1,10 +1,13 @@
 use sfsym::SFSym;
 
+pub struct SFVec {
+    content:u32
+}
 
 pub type SFVec = Vec<SFSym>;
 
-pub fn split(input_vec:SFVec, begin:usize, end:usize) ->  Result<usize,String> {
-    if(begin < end && end < input_vec.len()) {
+pub fn split(input_vec:&SFVec, begin:usize, end:usize) ->  Result<usize,String> {
+    if begin < end && end < input_vec.len() {
         let mut total_prob:f32 = 0.0;
         let mut prob_count:f32 = 0.0;
         let mut result:usize = 0;
