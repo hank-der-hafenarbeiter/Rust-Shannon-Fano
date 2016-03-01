@@ -1,5 +1,6 @@
 use std::string;
 use std::option;
+use std::cmp::Ordering;
 use sfsym;
 mod sfvec;
 
@@ -9,6 +10,7 @@ pub struct SFCodec {
     sym_table:sfvec::SFVec,
 }
 
+        
 impl SFCodec {
 
     pub fn encode(&mut self, input_string:String) -> Option<String> {
@@ -34,7 +36,7 @@ impl SFCodec {
             }
             self.sym_table.push(sfsym::SFSym{sym:character, count:1, prob:0.0, coding:"".to_string()});
         }
- 
+         
     }
 
     fn create_code(&self) {
