@@ -2,10 +2,11 @@ use std::cmp;
 use std::ops::Add;
 use std::option::Option;
 
+#[derive(Debug)]
 pub struct SFSym {
     pub	sym:char,
 	pub count:i32,
-    pub prob:f32,
+    pub prob:f64,
 	pub coding:String,
 }
 
@@ -59,9 +60,9 @@ impl cmp::Eq for SFSym {}
 
 impl Add for SFSym {
 
-    type Output = f32;
+    type Output = f64;
 
-    fn add(self, op2:SFSym) -> f32 {
+    fn add(self, op2:SFSym) -> f64 {
         self.prob+op2.prob
     }
 }

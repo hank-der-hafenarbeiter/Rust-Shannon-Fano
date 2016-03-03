@@ -1,29 +1,32 @@
 use sfsym::SFSym;
 
-pub struct SFVec {
-    content:u32
-}
-
 pub type SFVec = Vec<SFSym>;
 
 pub fn split(input_vec:&SFVec, begin:usize, end:usize) ->  Result<usize,String> {
-    if begin < end && end < input_vec.len() {
-        let mut total_prob:f32 = 0.0;
-        let mut prob_count:f32 = 0.0;
-        let mut result:usize = 0;
+    
+    if begin < end && end <= input_vec.len() {
+        let mut result:usize = begin+1;
+        let mut total_prob = 0.0;
 
-        for i in begin..end {
-            total_prob += input_vec[i].prob;
+        for x in begin..end {
+            total_prob += input_vec[x].prob;
+        }
+        
+        let mut prob_count:f64 = input_vec[begin].prob;
+        let mut diff1:f64 = (total_prob/2.0) - prob_count;
+        let mut diff2:f64 = 1.0;
+
+        while diff1.abs() < diff2.abs() {
+            prob_count += input_vec[result].prob;
+            diff2 = diff1;
+            diff1 = (total_prob/2.0) - prob_count; 
+            result += 1;
+            println!("diff1:{:?}, diff2:{:?}, result:{:?}", diff1, diff2, result);
         }
 
-        for (pos, ele) in input_vec.iter().enumerate(){
-            prob_count += ele.prob;
-            if prob_count > total_prob/2.0 {
-                result = pos;
-                break;
-            }
-        }
-        Ok(result-1)
+        result -= 1; 
+
+        Ok(result)
     }
     else {
         Err("Invalid Parameters!".to_string())
