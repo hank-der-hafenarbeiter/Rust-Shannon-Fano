@@ -12,6 +12,5 @@ fn main() {
     file.read_to_string(&mut text);
     let mut codec = sfcodec::SFCodec::new();
     codec.encode(text);
-
-    println!("codec: {:#?}", codec);
+    println!("{:#?}", codec);
 }

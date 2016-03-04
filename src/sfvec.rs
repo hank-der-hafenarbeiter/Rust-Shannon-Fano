@@ -21,7 +21,6 @@ pub fn split(input_vec:&SFVec, begin:usize, end:usize) ->  Result<usize,String> 
             diff2 = diff1;
             diff1 = (total_prob/2.0) - prob_count; 
             result += 1;
-            println!("diff1:{:?}, diff2:{:?}, result:{:?}", diff1, diff2, result);
         }
 
         result -= 1; 
@@ -33,6 +32,21 @@ pub fn split(input_vec:&SFVec, begin:usize, end:usize) ->  Result<usize,String> 
     }
 }
 
+trait Mergeable {
+    fn merge(&mut self, Self);
+}
+impl Mergeable for SFVec {
+
+    pub fn merge(&mut self, r_op:SFVec) {
+        for r_sym in r_op.iter() {
+            if let Some(search_res) = self.mut_iter().find(|l_sym| l_sym.sym == r_sym.sym) {
+                search_res.unwrap().count += 1;
+                continue;
+            }
+            self.push(r_sym);
+        }
+    }    
+}
 
 #[test]
 fn split_in_right_place() {
