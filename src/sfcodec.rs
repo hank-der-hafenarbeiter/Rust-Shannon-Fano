@@ -1,6 +1,8 @@
 use std::cmp::Ordering;
-use std::thread;
 use std::sync::Arc;
+
+extern crate crossbeam;
+
 use sfsym;
 use sfvec;
 use sfvec::Mergeable;
@@ -41,9 +43,9 @@ impl SFCodec {
         let mut begin = 0;
         let mut end = part_size;
         for i in 0..self.num_threads {
-            let part_text = Arc::new(&self.text[begin..end]).clone();
+            let part_text = &self.text[begin..end];
 
-            vec_handles.push(thread::spawn(move || SFCodec::parse_text_helper(&part_text)));
+            vec_handles.push(crossbeam::scope(|scope| scope.spawn(move || SFCodec::parse_text_helper(&part_text))));
 
             begin = end;
             end += part_size;
@@ -52,7 +54,7 @@ impl SFCodec {
         let mut t_sym_table = Self::parse_text_helper(&self.text[end..]);
 
         for thread in vec_handles.iter() {
-            t_sym_table.merge(thread.join().unwrap());
+            t_sym_table.merge(thread.join());
         }
 
         self.sym_table = t_sym_table;

@@ -1,6 +1,7 @@
 use std::io::Read;
 use std::env;
 use std::fs::File;
+
 mod sfcodec;
 mod sfsym;
 mod sfvec;

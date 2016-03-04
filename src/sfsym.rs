@@ -2,7 +2,7 @@ use std::cmp;
 use std::ops::Add;
 use std::option::Option;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct SFSym {
     pub	sym:char,
 	pub count:i32,

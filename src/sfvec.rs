@@ -39,11 +39,12 @@ impl Mergeable for SFVec {
 
     pub fn merge(&mut self, r_op:SFVec) {
         for r_sym in r_op.iter() {
-            if let Some(search_res) = self.mut_iter().find(|l_sym| l_sym.sym == r_sym.sym) {
-                search_res.unwrap().count += 1;
+            if let Some(search_res) = self.iter_mut().find(|l_sym:&SFSym| l_sym.sym == r_sym.sym) {
+                search_res.count += 1;
                 continue;
+            } else {
+            self.push(r_sym.clone());
             }
-            self.push(r_sym);
         }
     }    
 }
