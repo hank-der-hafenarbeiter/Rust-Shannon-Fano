@@ -36,33 +36,36 @@ impl SFCodec {
     }
 
     fn parse_text(&mut self) {
-        let vec_handles = Vec::with_capacity(self.num_threads);
-
+        let mut vec_handles = Vec::with_capacity(self.num_threads);
         let remainder = self.text.len() % self.num_threads;
         let part_size = (self.text.len() - remainder)/self.num_threads;
         let mut begin = 0;
         let mut end = part_size;
-        for i in 0..self.num_threads {
-            let part_text = &self.text[begin..end];
+        let mut t_sym_table = Vec::new(); 
 
-            vec_handles.push(crossbeam::scope(|scope| scope.spawn(move || SFCodec::parse_text_helper(&part_text))));
+        crossbeam::scope(|scope| {
+            for i in 0..self.num_threads {
+                let part_text = &self.text[begin..end];
+                
+                vec_handles.push(scope.spawn(move || SFCodec::parse_text_helper(&part_text)));
 
-            begin = end;
-            end += part_size;
-        }
+                begin = end;
+                end += part_size;
+            }
 
-        let mut t_sym_table = Self::parse_text_helper(&self.text[end..]);
+            t_sym_table = Self::parse_text_helper(&self.text[end..]);
 
-        for thread in vec_handles.iter() {
-            t_sym_table.merge(thread.join());
-        }
-
+            for thread in vec_handles.iter() {
+                let other_table = thread.join();
+                t_sym_table.merge(other_table);
+            }
+            
+        });
         self.sym_table = t_sym_table;
-
     }
 
     fn parse_text_helper(part_text:&str) -> sfvec::SFVec { 
-        let t_sym_table = sfvec::SFVec::new();
+        let mut t_sym_table = sfvec::SFVec::new();
         for character in part_text.chars() {
             {
                 let symbol = t_sym_table.iter_mut().find(|symbol| symbol.sym == character);

@@ -32,19 +32,19 @@ pub fn split(input_vec:&SFVec, begin:usize, end:usize) ->  Result<usize,String> 
     }
 }
 
-trait Mergeable {
+pub trait Mergeable {
     fn merge(&mut self, Self);
 }
+
 impl Mergeable for SFVec {
 
-    pub fn merge(&mut self, r_op:SFVec) {
+    fn merge(&mut self, r_op:SFVec) {
         for r_sym in r_op.iter() {
-            if let Some(search_res) = self.iter_mut().find(|l_sym:&SFSym| l_sym.sym == r_sym.sym) {
+            if let Some(search_res) = self.iter_mut().find(|ref l_sym| l_sym.sym == r_sym.sym) {
                 search_res.count += 1;
                 continue;
-            } else {
+            } 
             self.push(r_sym.clone());
-            }
         }
     }    
 }
