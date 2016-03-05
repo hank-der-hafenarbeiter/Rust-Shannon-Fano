@@ -12,6 +12,7 @@ fn main() {
     let mut text = String::new();
     file.read_to_string(&mut text);
     let mut codec = sfcodec::SFCodec::new();
+    codec.multithread_with(2);
     codec.encode(text);
     println!("{:#?}", codec);
 }

@@ -41,7 +41,7 @@ impl Mergeable for SFVec {
     fn merge(&mut self, r_op:SFVec) {
         for r_sym in r_op.iter() {
             if let Some(search_res) = self.iter_mut().find(|ref l_sym| l_sym.sym == r_sym.sym) {
-                search_res.count += 1;
+                search_res.count += r_sym.count;
                 continue;
             } 
             self.push(r_sym.clone());
@@ -49,24 +49,4 @@ impl Mergeable for SFVec {
     }    
 }
 
-#[test]
-fn split_in_right_place() {
-    let test_vec:SFVec = vec![   SFSym{sym:'a', count:6, prob:3.0/10.0, coding:"0".to_string()},
-            SFSym{sym:'b', count:2, prob:3.0/10.0, coding:"1".to_string()},
-            SFSym{sym:'c', count:1, prob:2.0/10.0, coding:"01".to_string()},
-            SFSym{sym:'d', count:1, prob:2.0/10.0, coding:"10".to_string()},];
-    let length = test_vec.len();
-    assert!(split(test_vec, 0, length-1) == Ok(1));
-}
 
-#[test]
-fn test_for_return() {
-    let mut result:usize = 0;
-
-    for (pos, _) in (0..100).enumerate() {
-        result = pos;
-        println!["{}",result];
-    }
-
-    assert!(result != 0);
-}

@@ -1,5 +1,4 @@
 use std::cmp::Ordering;
-use std::sync::Arc;
 
 extern crate crossbeam;
 
@@ -17,11 +16,15 @@ pub struct SFCodec {
 impl SFCodec {
 
     pub fn new() -> SFCodec {
-        SFCodec{ text:"".to_string(), sym_table:Vec::new(), num_threads:0}
+        SFCodec{ text:"".to_string(), sym_table:Vec::new(), num_threads:1}
     }
 
     pub fn multithread_with(&mut self, i:usize) {
-        self.num_threads = i;
+        if i > 0 {
+            self.num_threads = i;
+        } else {
+            self.num_threads = 1;
+        }
     }
 
     pub fn encode(&mut self, input_string:String) -> Option<String> {
@@ -37,30 +40,38 @@ impl SFCodec {
 
     fn parse_text(&mut self) {
         let mut vec_handles = Vec::with_capacity(self.num_threads);
-        let remainder = self.text.len() % self.num_threads;
-        let part_size = (self.text.len() - remainder)/self.num_threads;
         let mut begin = 0;
-        let mut end = part_size;
+        let mut end = 0;
         let mut t_sym_table = Vec::new(); 
 
+        if self.num_threads == 0 {
+            self.num_threads = 1
+        }
+        let remainder = self.text.len() % self.num_threads;
+        let part_size = (self.text.len() - remainder)/self.num_threads;
+        end = part_size;
         crossbeam::scope(|scope| {
-            for i in 0..self.num_threads {
+            for i in 0..self.num_threads-1 {
                 let part_text = &self.text[begin..end];
-                
+                    
                 vec_handles.push(scope.spawn(move || SFCodec::parse_text_helper(&part_text)));
 
                 begin = end;
                 end += part_size;
             }
 
-            t_sym_table = Self::parse_text_helper(&self.text[end..]);
-
-            for thread in vec_handles.iter() {
+            t_sym_table = SFCodec::parse_text_helper(&self.text[begin..self.text.len()]);
+            println!("\t{:#?}", t_sym_table);
+            println!("==============================================================================================================================================");
+            for thread in vec_handles.into_iter() {
                 let other_table = thread.join();
+                println!("\t\t{:#?}", other_table);
                 t_sym_table.merge(other_table);
             }
-            
-        });
+                
+            });
+         
+
         self.sym_table = t_sym_table;
     }
 
@@ -137,5 +148,4 @@ impl SFCodec {
         }
 
     }
-
 }
