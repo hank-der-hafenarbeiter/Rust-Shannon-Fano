@@ -5,6 +5,8 @@ use std::fs::File;
 mod sfcodec;
 mod sfsym;
 mod sfvec;
+mod utils;
+
 
 fn main() {
     let input = env::args().nth(1).unwrap();
@@ -13,7 +15,7 @@ fn main() {
     file.read_to_string(&mut text);
 
     let mut codec = sfcodec::SFCodec::new();
-    for i in 1..4 {
+    for i in 1..10 {
         codec.multithread_with(i);
         let text = text.clone();
         codec.encode(text);
