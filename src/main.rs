@@ -11,8 +11,11 @@ fn main() {
     let mut file = File::open(input).unwrap();
     let mut text = String::new();
     file.read_to_string(&mut text);
+
     let mut codec = sfcodec::SFCodec::new();
-    codec.multithread_with(2);
-    codec.encode(text);
-    println!("{:#?}", codec);
+    for i in 1..4 {
+        codec.multithread_with(i);
+        let text = text.clone();
+        codec.encode(text);
+    }
 }

@@ -5,3 +5,4 @@ authors = ["kevin"]
 
 [dependencies]
 crossbeam = "0.2.5"
+time = "0.1"

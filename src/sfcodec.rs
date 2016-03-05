@@ -1,5 +1,6 @@
 use std::cmp::Ordering;
 
+extern crate time;
 extern crate crossbeam;
 
 use sfsym;
@@ -47,6 +48,9 @@ impl SFCodec {
         if self.num_threads == 0 {
             self.num_threads = 1
         }
+
+        let start = time::PreciseTime::now();
+
         let remainder = self.text.len() % self.num_threads;
         let part_size = (self.text.len() - remainder)/self.num_threads;
         end = part_size;
@@ -61,11 +65,8 @@ impl SFCodec {
             }
 
             t_sym_table = SFCodec::parse_text_helper(&self.text[begin..self.text.len()]);
-            println!("\t{:#?}", t_sym_table);
-            println!("==============================================================================================================================================");
             for thread in vec_handles.into_iter() {
                 let other_table = thread.join();
-                println!("\t\t{:#?}", other_table);
                 t_sym_table.merge(other_table);
             }
                 
@@ -73,6 +74,8 @@ impl SFCodec {
          
 
         self.sym_table = t_sym_table;
+        let duration = start.to(time::PreciseTime::now());
+        println!("{} threads took {}", self.num_threads, duration);
     }
 
     fn parse_text_helper(part_text:&str) -> sfvec::SFVec { 
