@@ -94,20 +94,10 @@ impl SFCodec {
 
     } 
     fn create_sym_table(&mut self) {
-        //for character in self.text.chars() {
-        //    {
-        //        let symbol = self.sym_table.iter_mut().find(|symbol| symbol.sym == character);
-        //        if symbol.is_some() {
-        //            symbol.unwrap().count += 1;
-        //            continue;
-        //        }
-        //    }
-        //    self.sym_table.push(sfsym::SFSym{sym:character, count:1, prob:0.0, coding:"".to_string()});
-        //}
 
         self.parse_text();
 
-        let text_len = self.text.chars().fold(0,|acc, _| acc + 1);
+        let text_len = self.sym_table.iter().fold(0, |acc,x| acc + x.count);
         for sym in self.sym_table.iter_mut() {
             sym.prob = (sym.count as f64)/(text_len as f64);
         }
