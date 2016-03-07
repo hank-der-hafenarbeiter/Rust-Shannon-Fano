@@ -1,6 +1,5 @@
 use std::cmp::Ordering;
 
-extern crate time;
 extern crate crossbeam;
 
 use utils;
@@ -32,19 +31,16 @@ impl SFCodec {
 
     pub fn encode(&mut self, input_string:String) -> Option<String> {
         self.text = input_string;
-        let mut t0 = time::PreciseTime::now();
         self.create_sym_table();
-        println!("to create sym_table: {}", t0.to(time::PreciseTime::now()));
-        t0 = time::PreciseTime::now();
         self.create_code();
-        println!("to create code: {}", t0.to(time::PreciseTime::now()));
-        println!("=====================================================================================");
-        
-        //TODO reserve enough space for the resulting string
-        Some(self.text.chars().fold(String::new(), |code, character| { let ref char_code = self.sym_table   .iter().find(|symbol| symbol.sym == character)
-            .expect("Encountered unknown character!")
-                .coding;
-            code + &char_code}))
+        println!("{:#?}", self.sym_table); 
+        println!("{:#?}", self.sym_table.iter().fold(0, |acc,x| acc + x.count));
+
+        let output = String::with_capacity(self.sym_table.iter().fold(0, |acc, sym| acc + sym.count * sym.coding.len()));
+        Some(self.text.chars().fold(output, |code, character| { let ref char_code = self.sym_table   .iter().find(|symbol| symbol.sym == character)
+                                                                                                            .expect("Encountered unknown character!")
+                                                                                                            .coding;
+                                                                        code + &char_code}))
     }
 
     fn parse_text(&mut self) {

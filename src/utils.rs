@@ -24,3 +24,13 @@ pub fn find_previous_char_boundary(text:&String, index:usize) -> usize {
     index
 }
 
+pub fn bools_to_byte(bools:[bool;8]) -> u8 {
+    let mut result:u8 = 0;
+    let mut bit_mask = 0b00000001;
+    for x in bools {
+        if x {
+            (result | bit_mask) 
+        }
+        bit_mask << 1;
+    }
+}
