@@ -15,9 +15,8 @@ fn main() {
     file.read_to_string(&mut text);
 
     let mut codec = sfcodec::SFCodec::new();
-    for i in 1..10 {
-        codec.multithread_with(i);
-        let text = text.clone();
-        codec.encode(text);
-    }
+    codec.multithread_with(32);
+    let text = text.clone();
+    codec.encode(text);
+    
 }
