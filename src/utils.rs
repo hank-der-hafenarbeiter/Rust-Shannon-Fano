@@ -31,7 +31,6 @@ pub fn bools_to_byte(bools:[bool;8]) -> u8 {
     let mut result:u8 = 0b0000_0000;
     let mut bit_mask = 0b1000_0000;
     for i in 0..8 {
-        println!("bit_mask = {:08b}", bit_mask);
         if bools[i] {
             result = result | bit_mask;
         }
@@ -45,7 +44,7 @@ pub fn byte_to_bools(byte:u8) -> [bool;8] {
     let mut bit_mask = 0b1000_0000;
 
     for i in 0..8 {
-        result[i] = (bit_mask | byte) != 0;
+        result[i] = (bit_mask & byte) != 0;
         bit_mask = bit_mask >> 1;
     }
     result
@@ -57,14 +56,13 @@ fn test_bool_to_byte() {
     use self::rand::{thread_rng, Rng};
 
     let mut rng = thread_rng();
-    for i in 0..20 {
+    for _ in 0..20 {
         let mut bools = [false;8];
         let mut num:u8 = 0;
         for i in 0..8 {
             bools[i] = rng.gen();
             if bools[i] {num = num | (0b1000_0000 >>  i);}
         }
-        println!("{}: {:08b} ==  {:08b}",i, num, bools_to_byte(bools));
         assert!(num == bools_to_byte(bools));
     }
 }
@@ -75,13 +73,13 @@ fn test_byte_and_back() {
     use self::rand::{thread_rng, Rng};
 
     let mut rng = thread_rng();
-    for i in 0..20 {
+    for _ in 0..20 {
         let mut num:u8 = 0;
-        for i in 0..8 {
+        for _ in 0..8 {
             num = rng.gen();
         }
-        
-        assert!(num, bools_to_byte(byte_to_bools(num)));
+        println!("num:{:08b} => {:?} => {:08b}", num, byte_to_bools(num), bools_to_byte(byte_to_bools(num)));
+        assert!(num ==  bools_to_byte(byte_to_bools(num)));
     }
 }
  

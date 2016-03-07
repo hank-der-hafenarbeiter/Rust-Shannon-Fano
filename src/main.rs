@@ -5,6 +5,7 @@ use std::fs::File;
 mod sfcodec;
 mod sfsym;
 mod sfvec;
+mod binvec;
 mod utils;
 
 
