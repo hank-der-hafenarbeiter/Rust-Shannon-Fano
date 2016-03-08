@@ -1,4 +1,5 @@
 use std::boxed;
+use std::slice;
 use utils;
 
 pub struct BinVec {
@@ -74,26 +75,34 @@ impl BinVec {
 }
 
 struct BinVecBytewise<'a> {
-    cur_vector:&'a BinVec,
+    vector:&'a BinVec,
     cur_pos:usize,
+    iter:Option<Box<BinVecBytewise<'a>>>,
+    
 }
 impl<'a> BinVecBytewise<'a> {
 
-    fn new(vector:&'a BinVec, pos:usize) -> BinVecBytewise {
-        BinVecBytewise{cur_vector:vector, cur_pos:pos}
+    fn new(v:&'a BinVec, pos:usize) -> BinVecBytewise {
+        match v.appended_vector {
+            Some(x)  => BinVecBytewise{ vector:v, cur_pos:0, iter:Some(Box::new(x.as_bytes()))},
+            None     => BinVecBytewise{ vector:v, cur_pos:0, iter:None},
+        }
     }
 }
 
 impl<'a> Iterator for BinVecBytewise<'a> {
-    type Item = u8;
+    type Item = &'a u8;
 
-    fn next(&mut self) -> Option<u8> {
-        if self.cur_pos+1 < self.cur_vector.content.len() {     //next step still in current vector
+    fn next(&mut self) -> Option<&'a u8> {
+        if self.cur_pos +1 < self.vector.content.len() {
             self.cur_pos += 1;
-            return Some(self.cur_vector.content[self.cur_pos]);
+            return self.vector.content.get(self.cur_pos);
         } else {
-            let result = &self.cur_vector.appended_vector.and_then(|nextVec| nextVec.as_bytes().next());
-            result
+            match self.iter {
+                Some(iterator)  => return iterator.next(),
+                None            => return None,
+            }
         }
     }
 }
+
