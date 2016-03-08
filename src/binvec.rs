@@ -83,10 +83,11 @@ struct BinVecBytewise<'a> {
 impl<'a> BinVecBytewise<'a> {
 
     fn new(v:&'a BinVec, pos:usize) -> BinVecBytewise {
-        match v.appended_vector {
-            Some(x)  => BinVecBytewise{ vector:v, cur_pos:0, iter:Some(Box::new(x.as_bytes()))},
-            None     => BinVecBytewise{ vector:v, cur_pos:0, iter:None},
+        let mut new_vec = BinVecBytewise{vector:v, cur_pos:0, iter:None};
+        if new_vec.vector.appended_vector.is_some() {
+            new_vec.iter = Some(Box::new(new_vec.vector.appended_vector.unwrap().as_bytes()));
         }
+        new_vec
     }
 }
 
