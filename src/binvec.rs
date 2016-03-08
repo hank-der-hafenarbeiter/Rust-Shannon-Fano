@@ -68,30 +68,32 @@ impl BinVec {
         }
     }
 
-    pub fn as_bytes(self) -> Iterator<Item=u8> {
+    pub fn as_bytes<'a>(&'a self) -> BinVecBytewise<'a> {
         BinVecBytewise::new(self,0)
     }
 }
 
-struct BinVecBytewise {
-    cur_vector:BinVec,
+struct BinVecBytewise<'a> {
+    cur_vector:&'a BinVec,
     cur_pos:usize,
 }
-impl BinVecBytewise {
+impl<'a> BinVecBytewise<'a> {
 
-    fn new(vector:BinVec, pos:usize) -> BinVecBytewise {
+    fn new(vector:&'a BinVec, pos:usize) -> BinVecBytewise {
         BinVecBytewise{cur_vector:vector, cur_pos:pos}
     }
 }
 
-impl Iterator for BinVecBytewise {
+impl<'a> Iterator for BinVecBytewise<'a> {
     type Item = u8;
 
     fn next(&mut self) -> Option<u8> {
-        if self.cur_pos < self.cur_vector.content.len() {
+        if self.cur_pos+1 < self.cur_vector.content.len() {     //next step still in current vector
+            self.cur_pos += 1;
             return Some(self.cur_vector.content[self.cur_pos]);
         } else {
-            return self.cur_vector.appended_vector.and_then(|nextVec| nextVec.as_bytes().next())
+            let result = &self.cur_vector.appended_vector.and_then(|nextVec| nextVec.as_bytes().next());
+            result
         }
     }
 }
