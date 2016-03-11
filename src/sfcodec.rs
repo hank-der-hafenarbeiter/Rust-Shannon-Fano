@@ -3,6 +3,7 @@ use std::cmp::Ordering;
 extern crate crossbeam;
 
 use utils;
+use binvec;
 use sfsym;
 use sfvec;
 use sfvec::Mergeable;
@@ -10,15 +11,28 @@ use sfvec::Mergeable;
 #[derive(Debug)]
 pub struct SFCodec {
     text:String,
-    sym_table:sfvec::SFVec,
+    sym_table:sfvec::SFVec, //TODO: implement as binary tree with symbols in the leafs (better for decoding)
     max_num_threads:usize,
     cur_num_threads:usize,
 }
 
 impl SFCodec {
 
+    pub fn test(&mut self, input_string:String) {
+        let bin_vec = self.encode(input_string).unwrap();
+
+        let output_string = &self.text.chars().fold(String::new(),|output, c|{ output + &self.sym_table.iter().find(|s| s.sym == c).unwrap().coding[..]});
+                                                                                                                
+        for bin in bin_vec.as_bytes(){
+            print!("{:08b}", bin);
+        }
+        println!("");
+        print!("{:?}", output_string);
+        
+    }
+
     pub fn new() -> SFCodec {
-        SFCodec{ text:"".to_string(), sym_table:Vec::new(), max_num_threads:1, cur_num_threads:0}
+        SFCodec{ text:"".to_string(), sym_table:Vec::new(), max_num_threads:1, cur_num_threads:1}
     }
 
     pub fn multithread_with(&mut self, i:usize) {
@@ -29,18 +43,60 @@ impl SFCodec {
         }
     }
 
-    pub fn encode(&mut self, input_string:String) -> Option<String> {
+    pub fn encode(&mut self, input_string:String) -> Option<binvec::BinVec> {
         self.text = input_string;
         self.create_sym_table();
         self.create_code();
-        println!("{:#?}", self.sym_table); 
-        println!("{:#?}", self.sym_table.iter().fold(0, |acc,x| acc + x.count));
 
-        let output = String::with_capacity(self.sym_table.iter().fold(0, |acc, sym| acc + sym.count * sym.coding.len()));
-        Some(self.text.chars().fold(output, |code, character| { let ref char_code = self.sym_table   .iter().find(|symbol| symbol.sym == character)
-                                                                                                            .expect("Encountered unknown character!")
-                                                                                                            .coding;
-                                                                        code + &char_code}))
+        Some(self.translate())
+        
+    }
+
+    fn translate(&mut self) -> binvec::BinVec {
+        let mut output = binvec::BinVec::new();
+        let mut vec_handles = Vec::with_capacity(self.max_num_threads);
+        let mut begin = 0;
+        let mut end = 0;
+
+        let remainder = self.text.len()%self.max_num_threads;           //TODO: maybe just integer division?
+        let part_size = (self.text.len()-remainder)/self.max_num_threads;
+
+        end = part_size;
+
+        crossbeam::scope(|scope| {
+            while self.cur_num_threads < self.max_num_threads-1 {
+                end = utils::find_previous_char_boundary(&self.text, end);
+                let part_text = &self.text[begin..end];
+                
+                let sym_table_clone = self.sym_table.clone();
+                vec_handles.push(scope.spawn(move || SFCodec::translate_helper(sym_table_clone, &part_text)));
+
+                self.cur_num_threads += 1;
+                begin = end;
+                end += part_size;
+            }
+
+            let t_result = SFCodec::translate_helper(self.sym_table.clone(), &self.text[begin..self.text.len()]);
+
+            for thread in vec_handles.into_iter() {
+                self.cur_num_threads -= 1;
+                output.append(thread.join());
+            }
+
+            output.append(t_result); 
+        });
+        return output;
+
+    }
+
+    fn translate_helper(sym_table:sfvec::SFVec, part_text:&str) -> binvec::BinVec {
+        let mut vector = binvec::BinVec::new();
+        for c in part_text.chars() {
+            for bit_as_char in sym_table.iter().find(|&x| x.sym == c).map(|symbol| symbol.coding.clone()).unwrap().chars() {
+                vector.push(bit_as_char != '0');
+            }
+        }
+        vector
     }
 
     fn parse_text(&mut self) {
