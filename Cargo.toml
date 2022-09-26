@@ -4,6 +4,6 @@ version = "0.1.0"
 authors = ["kevin"]
 
 [dependencies]
-crossbeam = "0.2.5"
+crossbeam = "0.7.0"
 time = "0.1"
 rand = "0.3"
